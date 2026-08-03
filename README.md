@@ -24,7 +24,7 @@ An end-to-end pipeline that ingests weather and air quality data, transforms it,
 Work in progress, built incrementally milestone by milestone:
 
 - [x] Docker Compose base (Airflow + warehouse Postgres)
-- [ ] Extraction script (raw layer)
+- [x] Extraction script (raw layer)
 - [ ] Airflow DAG — extract & load
 - [ ] dbt staging layer
 - [ ] dbt marts + tests
