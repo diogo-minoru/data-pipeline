@@ -17,8 +17,8 @@ def connect_warehouse_db():
         "database": "warehouse",
         "user": "admin",
         "password": "8e8p&L5V",
-        "host": "localhost",
-        "port": 5433
+        "host": "warehouse-db",
+        "port": 5432
     }
 
     try:
@@ -34,7 +34,7 @@ def connect_warehouse_db():
         return conn
     
     except Exception as e:
-        logging.info(f"Error Connecting to Database: {e}")
+        raise e
 
 def create_new_table(query):
 
@@ -69,18 +69,19 @@ def extract_open_meteo(cities, run_date):
 
 
 def build_rows(data, response_key):
-    return [(d["city"], d["extracted_at"], Json(d[response_key])) for d in data]
+    return [(d["city"], d["extracted_at"], d[response_key]) for d in data]
 
 
 def ingest_data(rows, table_name, columns):
 
     conn = connect_warehouse_db()
-
+    
     try:
         with conn.cursor() as cur:
             cols = ", ".join(columns)
+            wrapped_rows = [(city, extracted_at, Json(response)) for city, extracted_at, response in rows]
             query = f"INSERT INTO {table_name} ({cols}) VALUES %s ON CONFLICT (city, extracted_at) DO UPDATE SET {columns[-1]} = EXCLUDED.{columns[-1]};"
-            execute_values(cur, query, rows)
+            execute_values(cur, query, wrapped_rows)
         conn.commit()
         return logging.info("Data ingested successfully.")
     except Exception as e:
@@ -89,28 +90,31 @@ def ingest_data(rows, table_name, columns):
         conn.close()
     
 
-cities = [("Ribeirão Preto", -21.1775, -47.8103), ("Maringá", -23.4253, -51.9386), ("Marabá" ,-5.3815, -49.1323)]
+if __name__ == "__main__":
+    cities = [("Ribeirão Preto", -21.1775, -47.8103), ("Maringá", -23.4253, -51.9386), ("Marabá" ,-5.3815, -49.1323)]
 
-query1 = """CREATE SCHEMA IF NOT EXISTS raw;
-        CREATE TABLE IF NOT EXISTS raw.air_quality_open_meteo
-        (city TEXT NOT NULL,
-        extracted_at DATE NOT NULL,
-        air_quality_response JSONB NOT NULL,
-        CONSTRAINT air_quality_city_extracted_at UNIQUE (city, extracted_at));"""
+    data = extract_open_meteo(cities=cities, run_date=datetime.strptime('2026-07-29', "%Y-%m-%d").date())
 
-query2 = """CREATE SCHEMA IF NOT EXISTS raw;
-        CREATE TABLE IF NOT EXISTS raw.forecast_open_meteo
-        (city TEXT NOT NULL,
-        extracted_at DATE NOT NULL,
-        forecast_response JSONB NOT NULL,
-        CONSTRAINT forecast_city_extracted_at UNIQUE (city, extracted_at));"""
+    air_quality_rows = build_rows(data, "air_quality")
+    forecast_rows = build_rows(data, "forecast")
 
-create_new_table(query=query1)
-create_new_table(query=query2)
-data = extract_open_meteo(cities=cities, run_date=datetime.strptime('2026-07-29', "%Y-%m-%d").date())
+    ingest_data(air_quality_rows, "raw.air_quality_open_meteo", ["city", "extracted_at", "air_quality_response"])
+    ingest_data(forecast_rows, "raw.forecast_open_meteo", ["city", "extracted_at", "forecast_response"])
 
-air_quality_rows = build_rows(data, "air_quality")
-forecast_rows = build_rows(data, "forecast")
 
-ingest_data(air_quality_rows, "raw.air_quality_open_meteo", ["city", "extracted_at", "air_quality_response"])
-ingest_data(forecast_rows, "raw.forecast_open_meteo", ["city", "extracted_at", "forecast_response"])
+# query1 = """CREATE SCHEMA IF NOT EXISTS raw;
+#         CREATE TABLE IF NOT EXISTS raw.air_quality_open_meteo
+#         (city TEXT NOT NULL,
+#         extracted_at DATE NOT NULL,
+#         air_quality_response JSONB NOT NULL,
+#         CONSTRAINT air_quality_city_extracted_at UNIQUE (city, extracted_at));"""
+
+# query2 = """CREATE SCHEMA IF NOT EXISTS raw;
+#         CREATE TABLE IF NOT EXISTS raw.forecast_open_meteo
+#         (city TEXT NOT NULL,
+#         extracted_at DATE NOT NULL,
+#         forecast_response JSONB NOT NULL,
+#         CONSTRAINT forecast_city_extracted_at UNIQUE (city, extracted_at));"""
+
+# create_new_table(query=query1)
+# create_new_table(query=query2)
