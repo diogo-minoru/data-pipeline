@@ -7,9 +7,9 @@ cities = [("Ribeirão Preto", -21.1775, -47.8103), ("Maringá", -23.4253, -51.93
 @dag(start_date=datetime.datetime(2021, 1, 1), schedule="@daily")
 def pipeline():
 
-    @task
-    def extract_task(cities, logical_date=None):
-        return extract_open_meteo(cities=cities, run_date=logical_date.date())
+    @task(retries=3, retry_delay=datetime.timedelta(minutes=2))
+    def extract_task(city, logical_date=None):
+        return extract_open_meteo(cities=city, run_date=logical_date.date())
 
     @task
     def build_rows_task(data, response):
@@ -19,7 +19,7 @@ def pipeline():
     def ingest_task(rows, table_name, columns):
         return ingest_data(rows=rows, table_name=table_name, columns=columns)
 
-    data = extract_task(cities)
+    data = extract_task.expand(city=cities)
 
     air_quality_rows = build_rows_task(data, "air_quality")
     forecast_rows = build_rows_task(data, "forecast")

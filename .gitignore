@@ -13,3 +13,8 @@ plugins/
 
 # Virtual environments
 .venv
+
+dbt/datapipeline/target/
+dbt/datapipeline/dbt_packages/
+dbt/datapipeline/logs/
+dbt/datapipeline//.env

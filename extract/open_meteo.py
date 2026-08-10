@@ -50,22 +50,19 @@ def create_new_table(query):
         return print(f"Error while creating the table: {e}")
 
 def extract_open_meteo(cities, run_date):
+    city_name, latitude, longitude = cities
+    
+    air_quality_response = requests.get(url=f'https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=dust,uv_index,carbon_dioxide,methane,ozone')
+    forecast_response = requests.get(url=f'https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=temperature_2m,rain')
 
-    result = []
-    for city_name, latitude, longitude in cities:
-        air_quality_response = requests.get(url=f'https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=dust,uv_index,carbon_dioxide,methane,ozone')
-        forecast_response = requests.get(url=f'https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=temperature_2m,rain')
+    data = {
+        "city": city_name,
+        "extracted_at": run_date,
+        "air_quality": air_quality_response.json(),
+        "forecast": forecast_response.json(),
+    }
 
-        data = {
-            "city": city_name,
-            "extracted_at": run_date,
-            "air_quality": air_quality_response.json(),
-            "forecast": forecast_response.json(),
-        }
-
-        result.append(data)
-
-    return result
+    return data
 
 
 def build_rows(data, response_key):
@@ -88,33 +85,3 @@ def ingest_data(rows, table_name, columns):
         return logging.error(f"Error while ingesting: {e}")
     finally:
         conn.close()
-    
-
-if __name__ == "__main__":
-    cities = [("Ribeirão Preto", -21.1775, -47.8103), ("Maringá", -23.4253, -51.9386), ("Marabá" ,-5.3815, -49.1323)]
-
-    data = extract_open_meteo(cities=cities, run_date=datetime.strptime('2026-07-29', "%Y-%m-%d").date())
-
-    air_quality_rows = build_rows(data, "air_quality")
-    forecast_rows = build_rows(data, "forecast")
-
-    ingest_data(air_quality_rows, "raw.air_quality_open_meteo", ["city", "extracted_at", "air_quality_response"])
-    ingest_data(forecast_rows, "raw.forecast_open_meteo", ["city", "extracted_at", "forecast_response"])
-
-
-# query1 = """CREATE SCHEMA IF NOT EXISTS raw;
-#         CREATE TABLE IF NOT EXISTS raw.air_quality_open_meteo
-#         (city TEXT NOT NULL,
-#         extracted_at DATE NOT NULL,
-#         air_quality_response JSONB NOT NULL,
-#         CONSTRAINT air_quality_city_extracted_at UNIQUE (city, extracted_at));"""
-
-# query2 = """CREATE SCHEMA IF NOT EXISTS raw;
-#         CREATE TABLE IF NOT EXISTS raw.forecast_open_meteo
-#         (city TEXT NOT NULL,
-#         extracted_at DATE NOT NULL,
-#         forecast_response JSONB NOT NULL,
-#         CONSTRAINT forecast_city_extracted_at UNIQUE (city, extracted_at));"""
-
-# create_new_table(query=query1)
-# create_new_table(query=query2)
