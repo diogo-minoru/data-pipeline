@@ -2,8 +2,6 @@ import requests
 import logging
 import psycopg2
 from psycopg2.extras import execute_values, Json
-from datetime import datetime
-# from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 

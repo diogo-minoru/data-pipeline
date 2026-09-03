@@ -1,0 +1,42 @@
+version: 1
+
+sources:
+  - name: data-pipeline
+    database: warehouse
+    schema: raw
+    description: "Raw data from open meteo api."
+    
+    tables:
+      - name: air_quality_open_meteo
+        description: "Raw air quality data for cities."
+        columns:
+          - name: city
+            description: "city name"
+            tests:
+              - not_null
+          
+          - name: extracted_at
+            description: "Date when data was extracted from api"
+            tests:
+              - not_null
+          - name: air_quality_response
+            description: "Response from the api"
+            tests:
+              - not_null
+
+      - name: forecast_open_meteo
+        description: "Raw air quality data for cities."
+        columns:
+          - name: city
+            description: "city name"
+            tests:
+              - not_null
+          
+          - name: extracted_at
+            description: "Date when data was extracted from api"
+            tests:
+              - not_null
+          - name: forecast_response
+            description: "Response from the api"
+            tests:
+              - not_null

@@ -1,8 +1,8 @@
-import datetime
+import pendulum
 from airflow.sdk import dag, task
 from airflow.providers.standard.operators.empty import EmptyOperator
 
-@dag(start_date=datetime.datetime(2021, 1, 1),schedule="@daily", catchup=False)
+@dag(start_date=pendulum.datetime(2021, 1, 1, tz='America/Sao_Paulo'),schedule="@daily", catchup=False, )
 def conditional_dag():
     @task.python
     def first_task():
