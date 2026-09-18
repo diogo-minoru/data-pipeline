@@ -26,8 +26,8 @@ Work in progress, built incrementally milestone by milestone:
 - [x] Docker Compose base (Airflow + warehouse Postgres)
 - [x] Extraction script (raw layer)
 - [x] Airflow DAG — extract & load
-- [ ] dbt staging layer
-- [ ] dbt marts + tests
+- [x] dbt staging layer
+- [x] dbt marts + tests
 - [ ] Cosmos integration
 - [ ] Metabase reporting
 - [ ] End-to-end verification

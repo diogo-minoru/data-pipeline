@@ -1,0 +1,75 @@
+models:
+  - name: mart_comfort_index
+    columns:
+      - name: city
+        data_tests:
+          - not_null
+      - name: extracted_at
+        data_tests:
+          - not_null
+      - name: forecast_day
+        data_tests:
+          - not_null
+      - name: comfort_index
+        data_tests:
+          - not_null
+      - name: class
+        data_tests:
+          - not_null
+  
+  - name: mart_daily_air_quality
+    columns:
+      - name: city
+        data_tests:
+          - not_null
+      - name: extracted_at
+        data_tests:
+          - not_null
+      - name: forecast_day
+        data_tests:
+          - not_null
+      - name: dust_units
+        data_tests:
+          - not_null
+      - name: avg_daily_dust_value
+        data_tests:
+          - not_null
+      - name: ozone_units
+        data_tests:
+          - not_null
+      - name: avg_daily_ozone
+        data_tests:
+          - not_null
+      - name: methane_units
+        data_tests:
+          - not_null
+      - name: avg_daily_methane
+        data_tests:
+          - not_null
+      - name: avg_daily_uv_index
+        data_tests:
+          - not_null
+      - name: carbon_units
+        data_tests:
+          - not_null
+      - name: avg_daily_carbon
+        data_tests:
+          - not_null
+  
+  - name: mart_daily_weather
+    columns:
+      - name: city
+        data_tests:
+          - not_null
+      - name: extracted_at
+        data_tests:
+          - not_null
+      - name: forecast_day
+        data_tests:
+          - not_null
+      - name: temperature_units
+        data_tests:
+          - not_null
+      - name: avg_daily_temperature
+        data_tests:
+          - not_null

@@ -1,0 +1,8 @@
+SELECT
+    CITY,
+    EXTRACTED_AT,
+    FORECAST_DAY,
+    COUNT(*) AS ROW_COUNT
+FROM {{ ref('mart_comfort_index') }}
+GROUP BY CITY, EXTRACTED_AT, FORECAST_DAY
+HAVING COUNT(*) > 1
