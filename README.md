@@ -28,7 +28,7 @@ Work in progress, built incrementally milestone by milestone:
 - [x] Airflow DAG — extract & load
 - [x] dbt staging layer
 - [x] dbt marts + tests
-- [ ] Cosmos integration
+- [x] Cosmos integration
 - [ ] Metabase reporting
 - [ ] End-to-end verification
 
